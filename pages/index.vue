@@ -11,6 +11,10 @@
 </template>
 
 <script setup lang="ts">
-// Tidak ada impor atau logika autentikasi di sini
-// definePageMeta juga tidak perlu diimpor secara eksplisit di <script setup>
+import { definePageMeta } from '#imports'
+
+// Terapkan middleware 'auth' ke halaman ini
+definePageMeta({
+  middleware: ['auth'],
+})
 </script>

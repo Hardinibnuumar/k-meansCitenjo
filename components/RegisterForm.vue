@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { auth } from '@/lib/firebase' // Pastikan ini mengarah ke inisialisasi Firebase yang benar
+import { useFirebase } from '~/composables/useFirebase'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 
 const router = useRouter()
@@ -13,21 +13,21 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 const success = ref('')
-const isLoading = ref(false) // Tambahkan state loading
+const isLoading = ref(false)
+const { auth } = useFirebase()
 
 async function handleRegister() {
   error.value = ''
   success.value = ''
-  isLoading.value = true // Set loading true saat mulai register
+  isLoading.value = true
   try {
     await createUserWithEmailAndPassword(auth, email.value, password.value)
-    success.value = 'Registrasi berhasil. Anda akan diarahkan ke halaman login.'
+    success.value = 'Registrasi berhasil. Anda akan diarahkan ke dashboard.'
     setTimeout(() => {
-      router.push('/login')
-    }, 2000) // Beri waktu lebih lama untuk membaca pesan sukses
+      router.push('/dashboard/enhanced') // Pastikan ini mengarah ke dashboard yang benar
+    }, 2000)
   } catch (err: any) {
-    console.error("Register Error:", err); // Log error lengkap untuk debugging
-    // Tampilkan pesan error yang lebih user-friendly
+    console.error("Register Error:", err);
     if (err.code === 'auth/email-already-in-use') {
       error.value = 'Email ini sudah terdaftar. Silakan gunakan email lain atau login.'
     } else if (err.code === 'auth/invalid-email') {
@@ -42,7 +42,7 @@ async function handleRegister() {
       error.value = 'Terjadi kesalahan saat registrasi. Silakan coba lagi.'
     }
   } finally {
-    isLoading.value = false // Set loading false setelah selesai (berhasil/gagal)
+    isLoading.value = false
   }
 }
 </script>
@@ -50,8 +50,8 @@ async function handleRegister() {
 <template>
   <div class="flex flex-col gap-6">
     <Card class="overflow-hidden p-0">
-      <CardContent class="grid p-0 md:grid-cols-2">
-        <form class="p-6 md:p-8 w-full" @submit.prevent="handleRegister">
+      <CardContent class="flex justify-center items-center p-0">
+        <form class="p-6 md:p-8 w-full max-w-md" @submit.prevent="handleRegister">
           <div class="flex flex-col gap-6">
             <div class="flex flex-col items-center text-center">
               <h1 class="text-2xl font-bold">Buat Akun</h1>
@@ -74,20 +74,12 @@ async function handleRegister() {
             <div v-if="success" class="text-sm text-green-500 text-center">{{ success }}</div>
             <div class="text-center text-sm">
               Sudah punya akun?
-              <button @click="router.push('/login')" class="underline underline-offset-4 text-blue-500">
+              <button type="button" @click="router.push('/login')" class="underline underline-offset-4 text-blue-500">
                 Login
               </button>
             </div>
           </div>
         </form>
-        <div class="bg-muted relative hidden md:block">
-          <!-- Menggunakan placeholder.svg untuk gambar -->
-          <img
-            src="/assets/image/gamarlogin.jfif"
-            alt="Image"
-            class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-          />
-        </div>
       </CardContent>
     </Card>
     <div class="text-muted-foreground text-center text-xs">

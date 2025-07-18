@@ -11,7 +11,7 @@ import {
   signInWithEmailAndPassword, 
   GoogleAuthProvider, 
   signInWithPopup 
-} from 'firebase/auth' // Hanya import yang diperlukan untuk Google
+} from 'firebase/auth'
 import { useFirebase } from '~/composables/useFirebase'
 
 const router = useRouter()
@@ -26,16 +26,15 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 const isLoading = ref(false)
-const captchaVerified = ref(false) // State untuk verifikasi CAPTCHA
+const captchaVerified = ref(false)
 
-// Fungsi untuk Login Google
 const handleGoogleLogin = async () => {
   error.value = ''
   isLoading.value = true
   try {
     const provider = new GoogleAuthProvider()
     await signInWithPopup(auth, provider)
-    router.push('/')
+    router.push('/dashboard/enhanced') // Arahkan ke dashboard setelah login Google
   } catch (err: any) {
     console.error("Google Login Error:", err);
     error.value = 'Gagal login dengan Google: ' + err.message;
@@ -48,7 +47,6 @@ const handleLogin = async () => {
   error.value = ''
   isLoading.value = true
 
-  // Validasi CAPTCHA
   if (!captchaVerified.value) {
     error.value = 'Harap verifikasi bahwa Anda bukan robot.'
     isLoading.value = false
@@ -57,7 +55,7 @@ const handleLogin = async () => {
 
   try {
     await signInWithEmailAndPassword(auth, email.value, password.value)
-    router.push('/') // Arahkan ke dashboard jika sukses
+    router.push('/dashboard/enhanced') // Arahkan ke dashboard jika sukses
   } catch (err: any) {
     console.error("Login Error:", err);
     if (err.code === 'auth/invalid-email') {
@@ -85,8 +83,10 @@ const handleLogin = async () => {
 <template>
   <div :class="cn('flex flex-col gap-6', props.class)">
     <Card class="overflow-hidden p-0">
-      <CardContent class="grid p-0 md:grid-cols-2">
-        <form class="p-6 md:p-8" @submit.prevent="handleLogin">
+      <!-- Ubah grid menjadi flex dan tambahkan justify-center untuk menengahkan konten -->
+      <CardContent class="flex justify-center items-center p-0">
+        <!-- Tambahkan max-w-md untuk membatasi lebar form agar tidak terlalu lebar di layar besar -->
+        <form class="p-6 md:p-8 w-full max-w-md" @submit.prevent="handleLogin">
           <div class="flex flex-col gap-6">
             <div class="flex flex-col items-center text-center">
               <h1 class="text-2xl font-bold">
@@ -141,28 +141,20 @@ const handleLogin = async () => {
                 Atau lanjutkan dengan
               </span>
             </div>
-            <div class="grid grid-cols-1 gap-4"> <!-- Mengubah grid-cols-3 menjadi grid-cols-1 -->
+            <div class="grid grid-cols-1 gap-4">
               <Button variant="outline" type="button" class="w-full" @click="handleGoogleLogin">
-                <img src="/assets/icon/google.svg" alt="Login with Google" class="h-4 w-4 mr-2" />
+                <img src="https://via.placeholder.com/16x16" alt="Login with Google" class="h-4 w-4 mr-2" />
                 <span>Login dengan Google</span>
               </Button>
-              <!-- Tombol Apple dan Meta dihapus -->
             </div>
             <div class="text-center text-sm">
               Belum punya akun?
-              <button @click="router.push('/register')" class="underline underline-offset-4 text-blue-500">
+              <button type="button" @click="router.push('/register')" class="underline underline-offset-4 text-blue-500">
                 Daftar
               </button>
             </div>
           </div>
         </form>
-        <div class="bg-muted relative hidden md:block">
-          <img
-            src="/assets/image/gamarlogin.jfif"
-            alt="Image"
-            class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-          >
-        </div>
       </CardContent>
     </Card>
     <div class="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
