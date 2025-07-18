@@ -14,7 +14,5 @@
 import { definePageMeta } from '#imports'
 
 // Terapkan middleware 'auth' ke halaman ini
-definePageMeta({
-  middleware: ['auth'],
-})
+
 </script>

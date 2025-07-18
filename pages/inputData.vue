@@ -73,13 +73,13 @@ import { ref, reactive } from 'vue'
 import { collection, addDoc } from 'firebase/firestore'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { definePageMeta } from '#app'
 import { useFirebase } from '~/composables/useFirebase' // Import composable
+import { definePageMeta } from '#imports' // Pastikan ini diimpor
 
 const { db } = useFirebase() // Gunakan composable untuk mendapatkan instance db
 
 definePageMeta({
-  title: 'Input Data Warga'
+  title: 'Input Data Warga',
 })
 
 const formData = reactive({

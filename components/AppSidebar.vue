@@ -3,7 +3,7 @@
     <SidebarHeader>
       <div class="flex items-center gap-2 px-2 py-1">
         <img src="https://via.placeholder.com/24x24" alt="Logo DSS" class="h-6 w-6" />
-        <span class="text-lg font-semibold text-sidebar-foreground">K-means Clastering <br>Desa Citenjo</br></span>
+        <span class="text-lg font-semibold text-sidebar-foreground">DSS SMART</span>
       </div>
       <SearchForm />
     </SidebarHeader>
@@ -121,6 +121,8 @@ const handleLogout = async () => {
     await signOut(auth)
     console.log('Logout berhasil, mengarahkan ke /login')
     router.push('/login') // Pastikan ini mengarah ke halaman login
+    // Tambahkan baris ini untuk memastikan refresh penuh setelah logout
+    window.location.reload(); 
   } catch (error) {
     console.error('Gagal logout:', error)
     alert('Gagal logout. Silakan coba lagi. Cek konsol untuk detail error.')
