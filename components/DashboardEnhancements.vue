@@ -1,40 +1,5 @@
 <template>
   <div class="space-y-6">
-    <!-- Real-time Notifications -->
-    <Card class="p-4">
-      <CardHeader>
-        <CardTitle class="text-lg flex items-center gap-2">
-          <Bell class="w-5 h-5" />
-          Notifikasi Real-time
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div class="space-y-3">
-          <div v-for="notification in notifications" :key="notification.id" 
-               :class="[
-                 'flex items-center p-3 rounded-lg border-l-4',
-                 notification.type === 'success' ? 'bg-green-50 border-green-400' :
-                 notification.type === 'warning' ? 'bg-yellow-50 border-yellow-400' :
-                 notification.type === 'info' ? 'bg-blue-50 border-blue-400' :
-                 'bg-red-50 border-red-400'
-               ]">
-            <div :class="[
-              'w-2 h-2 rounded-full mr-3',
-              notification.type === 'success' ? 'bg-green-500' :
-              notification.type === 'warning' ? 'bg-yellow-500' :
-              notification.type === 'info' ? 'bg-blue-500' :
-              'bg-red-500'
-            ]"></div>
-            <div class="flex-1">
-              <p class="text-sm font-medium">{{ notification.title }}</p>
-              <p class="text-xs text-gray-600">{{ notification.message }}</p>
-            </div>
-            <span class="text-xs text-gray-500">{{ notification.time }}</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-
     <!-- Quick Actions -->
     <Card class="p-4">
       <CardHeader>
@@ -42,49 +7,52 @@
       </CardHeader>
       <CardContent>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Button @click="addNewData" class="flex flex-col items-center p-4 h-auto">
+          <Button @click="addNewData" class="flex flex-col items-center justify-center p-2 h-24 text-center">
             <Plus class="w-6 h-6 mb-2" />
-            <span class="text-sm">Tambah Data</span>
+            <span class="text-xs leading-none">Tambah Data</span>
           </Button>
-          <Button @click="generateReport" variant="outline" class="flex flex-col items-center p-4 h-auto">
+          <Button @click="generateReport" variant="outline" class="flex flex-col items-center justify-center p-2 h-24 text-center">
             <FileText class="w-6 h-6 mb-2" />
-            <span class="text-sm">Generate Report</span>
+            <span class="text-xs leading-none">Generate<br>Report</br></span>
           </Button>
-          <Button @click="exportData" variant="outline" class="flex flex-col items-center p-4 h-auto">
+          <Button @click="exportData" variant="outline" class="flex flex-col items-center justify-center p-2 h-24 text-center">
             <Download class="w-6 h-6 mb-2" />
-            <span class="text-sm">Export Data</span>
+            <span class="text-xs leading-none">Export Data</span>
           </Button>
-          <Button @click="viewAnalytics" variant="outline" class="flex flex-col items-center p-4 h-auto">
+          <Button @click="viewAnalytics" variant="outline" class="flex flex-col items-center justify-center p-2 h-24 text-center">
             <BarChart3 class="w-6 h-6 mb-2" />
-            <span class="text-sm">Analytics</span>
+            <span class="text-xs leading-none">Analytics</span>
           </Button>
         </div>
       </CardContent>
     </Card>
 
-    <!-- Recent Activities -->
+    <!-- Riwayat Aktivitas Sistem (sebelumnya Aktivitas Terbaru) -->
     <Card class="p-4">
       <CardHeader>
-        <CardTitle class="text-lg">Aktivitas Terbaru</CardTitle>
+        <CardTitle class="text-lg">Riwayat Aktivitas Sistem</CardTitle>
       </CardHeader>
       <CardContent>
         <div class="space-y-3">
+          <div v-if="recentActivities.length === 0" class="text-center text-gray-500 py-4">
+            Tidak ada aktivitas terbaru.
+          </div>
           <div v-for="activity in recentActivities" :key="activity.id" 
                class="flex items-center p-3 hover:bg-gray-50 rounded-lg">
             <div :class="[
-              'w-8 h-8 rounded-full flex items-center justify-center mr-3',
-              activity.type === 'add' ? 'bg-green-100 text-green-600' :
-              activity.type === 'edit' ? 'bg-blue-100 text-blue-600' :
-              activity.type === 'delete' ? 'bg-red-100 text-red-600' :
+              'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mr-3',
+              activity.type === 'data_added' ? 'bg-green-100 text-green-600' :
+              activity.type === 'data_updated' ? 'bg-blue-100 text-blue-600' :
+              activity.type === 'data_deleted' ? 'bg-red-100 text-red-600' :
               'bg-gray-100 text-gray-600'
             ]">
               <component :is="getActivityIcon(activity.type)" class="w-4 h-4" />
             </div>
             <div class="flex-1">
               <p class="text-sm font-medium">{{ activity.title }}</p>
-              <p class="text-xs text-gray-600">{{ activity.description }}</p>
+              <p class="text-xs text-gray-600">{{ activity.message }}</p>
             </div>
-            <span class="text-xs text-gray-500">{{ activity.time }}</span>
+            <span class="text-xs text-gray-500 ml-2 flex-shrink-0">{{ timeAgo(activity.timestamp) }}</span>
           </div>
         </div>
       </CardContent>
@@ -93,85 +61,96 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { 
   Bell, Plus, FileText, Download, BarChart3, 
-  UserPlus, Edit, Trash2, Eye 
+  UserPlus, Edit, Trash2, Eye, Clock, CheckCircle, XCircle
 } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
+import { collection, query, orderBy, limit, onSnapshot, Timestamp } from 'firebase/firestore'
+import { useFirebase } from '~/composables/useFirebase'
 
-const notifications = ref([
-  {
-    id: 1,
-    type: 'success',
-    title: 'Data Berhasil Ditambahkan',
-    message: 'Data warga RT 001/RW 02 telah berhasil ditambahkan',
-    time: '5 menit lalu'
-  },
-  {
-    id: 2,
-    type: 'warning',
-    title: 'Skor Rendah Terdeteksi',
-    message: 'RT 003/RW 01 memiliki skor rata-rata di bawah 0.4',
-    time: '15 menit lalu'
-  },
-  {
-    id: 3,
-    type: 'info',
-    title: 'Laporan Bulanan Siap',
-    message: 'Laporan analisis bulan ini telah selesai diproses',
-    time: '1 jam lalu'
-  }
-])
+const router = useRouter()
+const { db } = useFirebase()
 
-const recentActivities = ref([
-  {
-    id: 1,
-    type: 'add',
-    title: 'Data Warga Ditambahkan',
-    description: 'Budi Santoso - RT 001/RW 02',
-    time: '10 menit lalu'
-  },
-  {
-    id: 2,
-    type: 'edit',
-    title: 'Data Warga Diperbarui',
-    description: 'Siti Aminah - RT 002/RW 01',
-    time: '25 menit lalu'
-  },
-  {
-    id: 3,
-    type: 'view',
-    title: 'Laporan Dilihat',
-    description: 'Laporan RT 001/RW 01',
-    time: '1 jam lalu'
-  }
-])
+interface LogEntry {
+  id: string;
+  timestamp: Timestamp;
+  type: string; // e.g., 'data_added', 'data_updated', 'clustering_run', 'report_generated', 'data_deleted'
+  title: string;
+  message: string;
+  category: 'notification' | 'activity'; // 'notification' for alerts, 'activity' for logs
+}
 
+// Hapus `notifications` ref karena kita hanya akan menggunakan `recentActivities`
+// const notifications = ref<LogEntry[]>([]) 
+const recentActivities = ref<LogEntry[]>([])
+
+// Fungsi untuk mendapatkan ikon berdasarkan tipe aktivitas
 const getActivityIcon = (type: string) => {
   switch (type) {
-    case 'add': return UserPlus
-    case 'edit': return Edit
-    case 'delete': return Trash2
-    case 'view': return Eye
+    case 'data_added': return UserPlus
+    case 'data_updated': return Edit
+    case 'data_deleted': return Trash2
+    case 'clustering_run': return Clock // Atau ikon lain yang relevan
+    case 'report_generated': return FileText
+    case 'data_exported': return Download
+    case 'viewed': return Eye
     default: return Eye
   }
 }
 
+// Fungsi untuk format waktu "sekian waktu lalu"
+const timeAgo = (timestamp: Timestamp) => {
+  const seconds = Math.floor((new Date().getTime() - timestamp.toDate().getTime()) / 1000)
+
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + " tahun lalu";
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + " bulan lalu";
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + " hari lalu";
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + " jam lalu";
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + " menit lalu";
+  return Math.floor(seconds) + " detik lalu";
+}
+
+// Quick Actions handlers
 const addNewData = () => {
-  console.log('Add new data')
+  router.push('/inputData')
 }
 
 const generateReport = () => {
-  console.log('Generate report')
+  alert('Fungsi Generate Report akan segera hadir!')
+  // logActivity('report_generated', 'Laporan Dibuat', 'Laporan analisis bulanan telah dibuat.', 'activity');
 }
 
 const exportData = () => {
-  console.log('Export data')
+  router.push('/outputData')
 }
 
 const viewAnalytics = () => {
-  console.log('View analytics')
+  router.push('/dashboard/enhanced') // Navigasi ke dashboard saat ini
 }
+
+onMounted(() => {
+  // Listener untuk Aktivitas Terbaru (sebelumnya juga digunakan untuk notifikasi)
+  const activitiesQuery = query(
+    collection(db, 'dashboard_logs'),
+    orderBy('timestamp', 'desc'),
+    limit(10) // Ambil 10 aktivitas terbaru
+  );
+
+  onSnapshot(activitiesQuery, (snapshot) => {
+    recentActivities.value = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data() as Omit<LogEntry, 'id'>,
+      timestamp: doc.data().timestamp // Pastikan timestamp adalah objek Timestamp Firebase
+    }));
+  });
+});
 </script>

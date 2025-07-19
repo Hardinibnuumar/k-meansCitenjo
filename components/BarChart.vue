@@ -29,7 +29,7 @@ const chartData = computed(() => ({
   labels: props.labels,
   datasets: [
     {
-      label: 'Skor Rata-Rata',
+      label: 'Jumlah Warga Klaster 2', // Label dataset lebih spesifik
       data: props.data,
       backgroundColor: 'rgba(59, 130, 246, 0.6)',
       borderColor: '#3b82f6',
@@ -47,13 +47,23 @@ const options = {
     },
     title: {
       display: true,
-      text: 'Skor Rata-Rata per RT/RW'
+      text: 'Jumlah Warga Klaster Prioritas Tinggi per RT/RW' // Judul lebih spesifik
     }
   },
   scales: {
     y: {
       beginAtZero: true,
-      max: 1
+      title: {
+        display: true,
+        text: 'Jumlah Warga Klaster 2' // Label sumbu Y lebih generik
+      }
+    },
+    x: {
+      ticks: {
+        autoSkip: false, // Jangan otomatis skip label
+        maxRotation: 90, // Rotasi label 90 derajat
+        minRotation: 90  // Rotasi label 90 derajat
+      }
     }
   }
 }

@@ -21,6 +21,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js'
+import { clusterDefinitions } from '~/utils/clusterDefinitions' // Import the new utility
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
@@ -29,12 +30,16 @@ const props = defineProps<{
   data: number[]
 }>()
 
-// Warna yang konsisten dengan tema
-const colors = [
-  '#10B981', // Green untuk Klaster 0
-  '#F59E0B', // Yellow untuk Klaster 1  
-  '#EF4444'  // Red untuk Klaster 2
-]
+// Warna yang konsisten dengan tema, diambil dari definisi klaster
+const colors = computed(() => clusterDefinitions.map(def => {
+  // Mengambil warna dari Tailwind class, ini perlu parsing atau mapping manual
+  // Untuk demo, kita bisa hardcode sesuai urutan klaster 0, 1, 2
+  if (def.id === 0) return '#10B981'; // Green
+  if (def.id === 1) return '#F59E0B'; // Yellow
+  if (def.id === 2) return '#EF4444'; // Red
+  return '#9CA3AF'; // Default gray
+}));
+
 
 const totalData = computed(() => {
   return props.data.reduce((sum, value) => sum + value, 0)
@@ -45,8 +50,8 @@ const chartData = computed(() => ({
   datasets: [
     {
       data: props.data,
-      backgroundColor: colors,
-      borderColor: colors.map(color => color),
+      backgroundColor: colors.value,
+      borderColor: colors.value.map(color => color),
       borderWidth: 2,
       hoverBorderWidth: 3,
       cutout: '65%', // Membuat donut hole

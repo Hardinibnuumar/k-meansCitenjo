@@ -1,71 +1,84 @@
+<template>
+  <canvas ref="chartCanvas"></canvas>
+</template>
+
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Line } from 'vue-chartjs'
-import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
-  LineElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  Filler // ✅ tambahkan plugin ini
-} from 'chart.js'
+import { ref, onMounted, watch, computed } from 'vue';
+import { Chart, registerables } from 'chart.js';
 
-// ✅ REGISTER semua plugin, termasuk Filler
-ChartJS.register(
-  Title,
-  Tooltip,
-  Legend,
-  LineElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  Filler // ✅ ini penting agar fill: true bekerja
-)
+Chart.register(...registerables);
 
-// Props dari parent
+const chartCanvas = ref<HTMLCanvasElement | null>(null);
+let chartInstance: Chart | null = null;
+
 const props = defineProps<{
-  labels: string[]
-  data: number[]
-}>()
+  labels: string[]; // Mengubah ini
+  data: number[];   // Mengubah ini
+}>();
 
-// ✅ Reactive chart data
-const chartData = computed(() => ({
+// Computed property untuk mengonversi props menjadi format yang diharapkan Chart.js
+const chartDataComputed = computed(() => ({
   labels: props.labels,
   datasets: [
     {
-      label: 'Skor Rata-Rata',
+      label: 'Jumlah Warga Klaster 2', // Label dataset untuk LineChart
       data: props.data,
-      borderColor: '#3b82f6',
-      backgroundColor: 'rgba(59, 130, 246, 0.2)',
-      fill: true, // ✅ Aktifkan fill area di bawah garis
-      tension: 0.4
+      borderColor: '#3b82f6', // Warna garis
+      backgroundColor: 'rgba(59, 130, 246, 0.2)', // Warna area di bawah garis
+      fill: true, // Mengisi area di bawah garis
+      tension: 0.4 // Membuat garis sedikit melengkung
     }
   ]
-}))
+}));
 
 const options = {
   responsive: true,
+  maintainAspectRatio: false,
   plugins: {
     legend: {
       position: 'top' as const
     },
     title: {
       display: true,
-      text: 'Rata-Rata Skor Kelayakan'
+      text: 'Jumlah Warga Klaster Prioritas Tinggi per RT/RW' // Judul lebih spesifik
     }
   },
   scales: {
     y: {
       beginAtZero: true,
-      max: 1
+      title: {
+        display: true,
+        text: 'Jumlah Warga Klaster 2' // Label sumbu Y lebih generik
+      }
+    },
+    x: {
+      ticks: {
+        autoSkip: false, // Jangan otomatis skip label
+        maxRotation: 90, // Rotasi label 90 derajat
+        minRotation: 90  // Rotasi label 90 derajat
+      }
     }
   }
 }
-</script>
 
-<template>
-  <Line :data="chartData" :options="options" />
-</template>
+onMounted(() => {
+  if (chartCanvas.value) {
+    chartInstance = new Chart(chartCanvas.value, {
+      type: 'line',
+      data: chartDataComputed.value, // Menggunakan computed property
+      options: options
+    });
+  }
+});
+
+watch(
+  () => chartDataComputed.value, // Mengamati computed property
+  (newChartData) => {
+    if (chartInstance) {
+      chartInstance.data = newChartData;
+      chartInstance.update();
+    }
+  },
+  { deep: true }
+);
+</script>

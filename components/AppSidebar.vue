@@ -39,22 +39,16 @@
       
       <SidebarSeparator />
 
+      <!-- Hapus grup "Referensi" jika hanya ada satu item yang tersisa, atau ganti namanya -->
+      <!-- Untuk saat ini, kita akan langsung menempatkan Settings di bawah separator -->
       <SidebarGroup>
-        <SidebarGroupLabel>Referensi</SidebarGroupLabel>
+        <SidebarGroupLabel>Sistem</SidebarGroupLabel>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild :is-active="currentPath === '/api-reference'">
-              <NuxtLink to="/api-reference">
-                <Code />
-                <span>API Reference</span>
-              </NuxtLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild :is-active="currentPath === '/components'">
-              <NuxtLink to="/components">
-                <Component />
-                <span>Components</span>
+            <SidebarMenuButton asChild :is-active="currentPath === '/settings'">
+              <NuxtLink to="/settings">
+                <Settings />
+                <span>Pengaturan & Info</span>
               </NuxtLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -66,14 +60,6 @@
       <SidebarGroup>
         <SidebarGroupLabel>Akun</SidebarGroupLabel>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild :is-active="currentPath === '/settings'">
-              <NuxtLink to="/settings">
-                <Settings />
-                <span>Settings</span>
-              </NuxtLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <button @click="handleLogout">
@@ -102,7 +88,7 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from '@/components/ui/sidebar'
-import { Home, Upload, Download, Code, Component, Settings, LogOut } from 'lucide-vue-next'
+import { Home, Upload, Download, Code, Component, Settings, LogOut, Info } from 'lucide-vue-next' // Tambahkan Info icon
 import SearchForm from './SearchForm.vue'
 import { useRouter } from 'vue-router'
 import { signOut } from 'firebase/auth'
@@ -121,8 +107,6 @@ const handleLogout = async () => {
     await signOut(auth)
     console.log('Logout berhasil, mengarahkan ke /login')
     router.push('/login') // Pastikan ini mengarah ke halaman login
-    // Tambahkan baris ini untuk memastikan refresh penuh setelah logout
-    window.location.reload(); 
   } catch (error) {
     console.error('Gagal logout:', error)
     alert('Gagal logout. Silakan coba lagi. Cek konsol untuk detail error.')

@@ -44,12 +44,12 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600 font-medium">Klaster Dominan</p>
-            <p class="text-2xl font-bold" :class="getClusterClass(dominantClusterId)">
-              {{ getClusterText(dominantClusterId) }}
+            <p class="text-2xl font-bold" :class="getClusterDefinition(dominantClusterId).colorClass">
+              {{ getClusterDefinition(dominantClusterId).name }}
             </p>
           </div>
-          <div class="w-10 h-10 rounded-full flex items-center justify-center" :class="getClusterBgClass(dominantClusterId)">
-            <svg class="w-5 h-5" :class="getClusterTextClass(dominantClusterId)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center" :class="getClusterDefinition(dominantClusterId).bgColorClass">
+            <svg class="w-5 h-5" :class="getClusterDefinition(dominantClusterId).colorClass" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
             </svg>
           </div>
@@ -186,8 +186,8 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-yellow-600">{{ item.clusterCounts[1] || 0 }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">{{ item.clusterCounts[2] || 0 }}</td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span :class="getClusterClass(item.dominantClusterId)" class="px-2 py-1 rounded-full text-xs font-medium">
-                  {{ getClusterText(item.dominantClusterId) }}
+                <span :class="getClusterDefinition(item.dominantClusterId).bgColorClass" class="px-2 py-1 rounded-full text-xs font-medium" :style="{ color: getClusterDefinition(item.dominantClusterId).colorClass }">
+                  {{ getClusterDefinition(item.dominantClusterId).name }}
                 </span>
               </td>
             </tr>
@@ -209,8 +209,8 @@
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Klaster Dominan:</span>
-              <span class="font-medium" :class="getClusterClass(rw.dominantClusterId)">
-                {{ getClusterText(rw.dominantClusterId) }}
+              <span class="font-medium" :class="getClusterDefinition(rw.dominantClusterId).colorClass">
+                {{ getClusterDefinition(rw.dominantClusterId).name }}
               </span>
             </div>
             <div class="flex justify-between">
@@ -236,7 +236,8 @@
 import { ref, computed, defineEmits } from 'vue'
 import LineChart from '@/components/LineChart.vue'
 import BarChart from '@/components/BarChart.vue'
-import * as XLSX from 'xlsx' // Import library XLSX
+import * as XLSX from 'xlsx'
+import { getClusterDefinition } from '~/utils/clusterDefinitions' // Import the new utility
 
 // Props - menggunakan data dari parent dashboard
 const props = defineProps<{
@@ -251,48 +252,6 @@ const selectedRW = ref('')
 const viewMode = ref<'chart' | 'table' | 'both'>('both')
 const chartType = ref<'line' | 'bar'>('line')
 
-// Helper functions for cluster styling and text
-const getClusterClass = (clusterId?: number) => {
-  if (clusterId === undefined) return 'bg-gray-100 text-gray-800';
-  switch (clusterId) {
-    case 2: return 'bg-red-100 text-red-800'; // Klaster prioritas tinggi (misal: butuh perhatian)
-    case 1: return 'bg-yellow-100 text-yellow-800'; // Klaster prioritas menengah
-    case 0: return 'bg-green-100 text-green-800'; // Klaster prioritas rendah (misal: layak)
-    default: return 'bg-gray-100 text-gray-800';
-  }
-}
-
-const getClusterText = (clusterId?: number) => {
-  if (clusterId === undefined) return '-';
-  switch (clusterId) {
-    case 2: return 'Klaster 2 (Prioritas Tinggi)';
-    case 1: return 'Klaster 1 (Prioritas Menengah)';
-    case 0: return 'Klaster 0 (Prioritas Rendah)';
-    default: return `Klaster ${clusterId}`;
-  }
-}
-
-const getClusterBgClass = (clusterId?: number) => {
-  if (clusterId === undefined) return 'bg-gray-100';
-  switch (clusterId) {
-    case 2: return 'bg-red-100';
-    case 1: return 'bg-yellow-100';
-    case 0: return 'bg-green-100';
-    default: return 'bg-gray-100';
-  }
-}
-
-const getClusterTextClass = (clusterId?: number) => {
-  if (clusterId === undefined) return 'text-gray-800';
-  switch (clusterId) {
-    case 2: return 'text-red-800';
-    case 1: return 'text-yellow-800';
-    case 0: return 'text-green-800';
-    default: return 'text-gray-800';
-  }
-}
-
-
 // Computed data untuk breakdown RT/RW
 const rtRwBreakdown = computed(() => {
   const breakdown: Record<string, {
@@ -300,7 +259,7 @@ const rtRwBreakdown = computed(() => {
     rw: number
     warga: any[]
     totalWarga: number
-    clusterCounts: Record<number, number> // Menggunakan Record<number, number>
+    clusterCounts: Record<number, number>
     dominantClusterId?: number
   }> = {}
 
@@ -315,23 +274,20 @@ const rtRwBreakdown = computed(() => {
         rw: warga.rw,
         warga: [],
         totalWarga: 0,
-        clusterCounts: { 0: 0, 1: 0, 2: 0 } as Record<number, number> // Inisialisasi dengan 0
+        clusterCounts: { 0: 0, 1: 0, 2: 0 } as Record<number, number>
       }
     }
     
     breakdown[key].warga.push(warga)
     breakdown[key].totalWarga++
     
-    // Hitung jumlah warga per klaster
     if (breakdown[key].clusterCounts[warga.clusterId] !== undefined) {
       breakdown[key].clusterCounts[warga.clusterId]++
     } else {
-      // Handle unexpected cluster IDs if necessary, or initialize dynamically
       breakdown[key].clusterCounts[warga.clusterId] = 1;
     }
   })
 
-  // Tentukan klaster dominan untuk setiap RT/RW
   Object.values(breakdown).forEach(item => {
     let maxCount = -1;
     let dominantId: number | undefined;
@@ -366,7 +322,6 @@ const sortedRTRWData = computed(() => {
     if (orderA !== orderB) {
       return orderA - orderB;
     }
-    // Jika klaster dominan sama, urutkan berdasarkan total warga (opsional)
     return b.totalWarga - a.totalWarga;
   })
 })
@@ -391,7 +346,6 @@ const totalRT = computed(() => filteredRTRWData.value.length)
 
 const dominantClusterId = computed(() => {
   if (filteredRTRWData.value.length === 0) return undefined;
-  // Menentukan klaster dominan secara keseluruhan dari data yang difilter
   const allClusterCounts: Record<number, number> = { 0: 0, 1: 0, 2: 0 };
   filteredRTRWData.value.forEach(item => {
     for (const clusterIdStr in item.clusterCounts) {
@@ -407,6 +361,10 @@ const dominantClusterId = computed(() => {
     const count = allClusterCounts[clusterId];
     if (count > maxCount) {
       maxCount = count;
+      dominantId = clusterId;
+    }
+    // Jika jumlah sama, pilih klaster dengan ID lebih tinggi (prioritas lebih tinggi)
+    else if (count === maxCount && dominantId !== undefined && clusterId > dominantId) {
       dominantId = clusterId;
     }
   }
@@ -480,6 +438,9 @@ const rwComparison = computed(() => {
         maxCount = count;
         dominantId = clusterId;
       }
+      else if (count === maxCount && dominantId !== undefined && clusterId > dominantId) {
+        dominantId = clusterId;
+      }
     }
 
     let rtWithMostCluster2 = '-';
@@ -520,7 +481,7 @@ const exportToExcel = () => {
     'Klaster 0': item.clusterCounts[0] || 0,
     'Klaster 1': item.clusterCounts[1] || 0,
     'Klaster 2': item.clusterCounts[2] || 0,
-    'Klaster Dominan': getClusterText(item.dominantClusterId)
+    'Klaster Dominan': getClusterDefinition(item.dominantClusterId).name
   }))
 
   const ws = XLSX.utils.json_to_sheet(dataToExport)
