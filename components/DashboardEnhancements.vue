@@ -13,7 +13,7 @@
           </Button>
           <Button @click="generateReport" variant="outline" class="flex flex-col items-center justify-center p-2 h-24 text-center">
             <FileText class="w-6 h-6 mb-2" />
-            <span class="text-xs leading-none">Generate<br>Report</br></span>
+            <span class="text-xs leading-none">Generate Report</span>
           </Button>
           <Button @click="exportData" variant="outline" class="flex flex-col items-center justify-center p-2 h-24 text-center">
             <Download class="w-6 h-6 mb-2" />

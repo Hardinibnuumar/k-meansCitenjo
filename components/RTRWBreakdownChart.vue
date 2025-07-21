@@ -22,7 +22,6 @@
         </select>
       </div>
     </div>
-
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div class="bg-white border rounded-lg p-4 shadow-sm">
@@ -39,12 +38,11 @@
           </div>
         </div>
       </div>
-      
       <div class="bg-white border rounded-lg p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600 font-medium">Klaster Dominan</p>
-            <p class="text-2xl font-bold" :class="getClusterDefinition(dominantClusterId).colorClass">
+            <p class="text-1xl font-bold" :class="getClusterDefinition(dominantClusterId).colorClass">
               {{ getClusterDefinition(dominantClusterId).name }}
             </p>
           </div>
@@ -55,12 +53,11 @@
           </div>
         </div>
       </div>
-      
       <div class="bg-white border rounded-lg p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600 font-medium">RT Klaster 2 Terbanyak</p>
-            <p class="text-lg font-bold text-red-600">{{ rtWithMostCluster2 }}</p>
+            <p class="text-1xl font-bold text-red-600">{{ rtWithMostCluster2 }}</p>
             <p class="text-xs text-gray-500">{{ maxCluster2Count }} warga</p>
           </div>
           <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
@@ -70,12 +67,11 @@
           </div>
         </div>
       </div>
-      
       <div class="bg-white border rounded-lg p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600 font-medium">RT Klaster 0 Terbanyak</p>
-            <p class="text-lg font-bold text-green-600">{{ rtWithMostCluster0 }}</p>
+            <p class="text-1xl font-bold text-green-600">{{ rtWithMostCluster0 }}</p>
             <p class="text-xs text-gray-500">{{ maxCluster0Count }} warga</p>
           </div>
           <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
@@ -86,7 +82,6 @@
         </div>
       </div>
     </div>
-
     <!-- Chart Section -->
     <div v-if="viewMode === 'chart' || viewMode === 'both'" class="bg-white border rounded-lg p-6 shadow-sm">
       <div class="flex justify-between items-center mb-4">
@@ -129,7 +124,6 @@
         />
       </div>
     </div>
-
     <!-- Table Section -->
     <div v-if="viewMode === 'table' || viewMode === 'both'" class="bg-white border rounded-lg shadow-sm overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200">
@@ -151,7 +145,6 @@
           </div>
         </div>
       </div>
-      
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
@@ -166,7 +159,7 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="(item, index) in sortedRTRWData" :key="`${item.rt}-${item.rw}`" class="hover:bg-gray-50">
+            <tr v-for="(item, index) in limitedRTRWData" :key="`${item.rt}-${item.rw}`" class="hover:bg-gray-50">
               <td class="px-6 py-4 whitespace-nowrap">
                 <div :class="[
                   'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold',
@@ -195,40 +188,7 @@
         </table>
       </div>
     </div>
-
-    <!-- Comparison Section -->
-    <div class="bg-white border rounded-lg p-6 shadow-sm">
-      <h4 class="text-lg font-semibold mb-4">Perbandingan Antar RW</h4>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div v-for="rw in rwComparison" :key="rw.rw" class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-          <h5 class="font-medium mb-3 text-center">RW {{ rw.rw }}</h5>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-              <span class="text-gray-600">Total RT:</span>
-              <span class="font-medium">{{ rw.totalRT }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">Klaster Dominan:</span>
-              <span class="font-medium" :class="getClusterDefinition(rw.dominantClusterId).colorClass">
-                {{ getClusterDefinition(rw.dominantClusterId).name }}
-              </span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">RT Klaster 2 Terbanyak:</span>
-              <span class="font-medium">RT {{ rw.rtWithMostCluster2 }}</span>
-            </div>
-            <div class="mt-3 pt-2 border-t">
-              <div class="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  class="bg-blue-500 h-2 rounded-full transition-all duration-300" 
-                  :style="{ width: `${(rw.clusterCounts[2] / rw.totalWarga) * 100 || 0}%` }"
-                ></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Comparison Section (Removed as requested) -->
   </div>
 </template>
 
@@ -240,7 +200,7 @@ import * as XLSX from 'xlsx'
 import { getClusterDefinition } from '~/utils/clusterDefinitions' // Import the new utility
 
 // Props - menggunakan data dari parent dashboard
-const props = defineProps<{
+const props = defineProps<{ 
   allWarga: any[]
 }>()
 
@@ -265,9 +225,8 @@ const rtRwBreakdown = computed(() => {
 
   props.allWarga.forEach(warga => {
     if (!warga.rt || !warga.rw || typeof warga.clusterId !== 'number') return
-    
+
     const key = `${warga.rt}-${warga.rw}`
-    
     if (!breakdown[key]) {
       breakdown[key] = {
         rt: warga.rt,
@@ -277,10 +236,10 @@ const rtRwBreakdown = computed(() => {
         clusterCounts: { 0: 0, 1: 0, 2: 0 } as Record<number, number>
       }
     }
-    
+
     breakdown[key].warga.push(warga)
     breakdown[key].totalWarga++
-    
+
     if (breakdown[key].clusterCounts[warga.clusterId] !== undefined) {
       breakdown[key].clusterCounts[warga.clusterId]++
     } else {
@@ -324,6 +283,11 @@ const sortedRTRWData = computed(() => {
     }
     return b.totalWarga - a.totalWarga;
   })
+})
+
+// Batasi jumlah baris yang ditampilkan di tabel
+const limitedRTRWData = computed(() => {
+  return sortedRTRWData.value.slice(0, 16); // Menampilkan maksimal 16 baris
 })
 
 // Available RW options
@@ -409,11 +373,9 @@ const maxCluster0Count = computed(() => {
   return Math.max(...filteredRTRWData.value.map(item => item.clusterCounts[0] || 0));
 })
 
-
-// RW Comparison
+// RW Comparison (This section is no longer used in the template after removal)
 const rwComparison = computed(() => {
   const rwGroups: Record<number, any[]> = {}
-
   rtRwBreakdown.value.forEach(item => {
     if (!rwGroups[item.rw]) rwGroups[item.rw] = []
     rwGroups[item.rw].push(item)
@@ -452,7 +414,7 @@ const rwComparison = computed(() => {
         rtWithMostCluster2 = `RT ${item.rt}`;
       }
     });
-    
+
     return {
       rw: parseInt(rw),
       totalRT: items.length,

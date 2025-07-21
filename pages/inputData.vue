@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6">
+  <div class="p-6 my-6">
     <h1 class="text-3xl font-bold text-gray-900 mb-6">Input Data Warga</h1>
 
     <div class="bg-white shadow-md rounded-lg p-6">
