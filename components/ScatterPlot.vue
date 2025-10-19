@@ -61,8 +61,8 @@ const chartData = computed(() => {
     datasets.push({
       label: clusterDef.name,
       data: groupedData[clusterId],
-      backgroundColor: clusterDef.id === 0 ? '#10B981' : clusterDef.id === 1 ? '#F59E0B' : clusterDef.id === 2 ? '#EF4444' : '#9CA3AF', // Warna sesuai klaster
-      borderColor: clusterDef.id === 0 ? '#059669' : clusterDef.id === 1 ? '#D97706' : clusterDef.id === 2 ? '#DC2626' : '#6B7280',
+      backgroundColor: clusterDef.id === 0 ? '#10B981' : clusterDef.id === 1 ? '#EF4444' : '#9CA3AF', // Warna sesuai klaster
+      borderColor: clusterDef.id === 0 ? '#059669' : clusterDef.id === 1 ? '#DC2626' : '#6B7280',
       pointRadius: 5,
       pointHoverRadius: 7,
     })

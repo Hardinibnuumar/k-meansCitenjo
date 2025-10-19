@@ -9,7 +9,7 @@ import LineChart from '@/components/LineChart.vue' // Tetap diimpor, tapi tidak 
 import RTRWBreakdownChart from '@/components/RTRWBreakdownChart.vue' // Dikembalikan
 import PieChart from '~/components/PieChart.vue'
 import SmartCriteriaWeights from '@/components/SmartCriteriaWeights.vue'
-import { Users, CheckCircle, Clock, XCircle } from 'lucide-vue-next'
+import { Users, CheckCircle, XCircle } from 'lucide-vue-next'
 import { useFirebase } from '~/composables/useFirebase'
 import DashboardEnhancements from '@/components/DashboardEnhancements.vue'
 import ClusterCharacteristicsTable from '@/components/ClusterCharacteristicsTable.vue'
@@ -23,7 +23,7 @@ const dbHook = useFirebaseHook.db;
 
 const allWarga = ref<any[]>([])
 const totalWarga = ref(0)
-const clusterCounts = ref<Record<number, number>>({ 0: 0, 1: 0, 2: 0 });
+const clusterCounts = ref<Record<number, number>>({ 0: 0, 1: 0 });
 const loading = ref(true)
 
 // State untuk pemilihan kriteria scatter plot
@@ -90,8 +90,8 @@ const legendDataDonut = computed(() => {
   return clusterDefinitions.map(def => ({
     label: def.name,
     value: clusterCounts.value[def.id] || 0,
-    color: def.id === 0 ? '#10B981' : def.id === 1 ? '#F59E0B' : def.id === 2 ? '#EF4444' : '#9CA3AF',
-    percentage: totalDataDonut.value > 0 
+    color: def.id === 0 ? '#10B981' : def.id === 1 ? '#EF4444' : '#9CA3AF',
+    percentage: totalDataDonut.value > 0
       ? Math.round(((clusterCounts.value[def.id] || 0) / totalDataDonut.value) * 100)
       : 0
   }))
@@ -104,9 +104,9 @@ const cluster0Percentage = computed(() => {
 
 const effectiveness = computed(() => {
   if (totalDataDonut.value === 0) return 'N/A'
-  const score = ((clusterCounts.value[0] || 0) * 1 + (clusterCounts.value[1] || 0) * 0.5) / totalDataDonut.value
-  if (score >= 0.8) return 'Tinggi'
-  if (score >= 0.6) return 'Sedang'
+  const score = (clusterCounts.value[0] || 0) / totalDataDonut.value
+  if (score >= 0.7) return 'Tinggi'
+  if (score >= 0.5) return 'Sedang'
   return 'Rendah'
 })
 
@@ -210,8 +210,7 @@ const router = useRouter()
 const getEnhancedCardClass = (clusterId: number) => {
   switch (clusterId) {
     case 0: return 'bg-gradient-to-br from-green-500 via-green-600 to-green-700 text-white'
-    case 1: return 'bg-gradient-to-br from-yellow-500 via-yellow-600 to-yellow-700 text-white'
-    case 2: return 'bg-gradient-to-br from-red-500 via-red-600 to-red-700 text-white'
+    case 1: return 'bg-gradient-to-br from-red-500 via-red-600 to-red-700 text-white'
     default: return 'bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 text-white'
   }
 }
@@ -219,8 +218,7 @@ const getEnhancedCardClass = (clusterId: number) => {
 const getTextColorClass = (clusterId: number) => {
   switch (clusterId) {
     case 0: return 'text-green-100'
-    case 1: return 'text-yellow-100'
-    case 2: return 'text-red-100'
+    case 1: return 'text-red-100'
     default: return 'text-gray-100'
   }
 }
@@ -228,8 +226,7 @@ const getTextColorClass = (clusterId: number) => {
 const getBadgeClass = (clusterId: number) => {
   switch (clusterId) {
     case 0: return 'bg-green-400/30 text-green-100 border border-green-400/50'
-    case 1: return 'bg-yellow-400/30 text-yellow-100 border border-yellow-400/50'
-    case 2: return 'bg-red-400/30 text-red-100 border border-red-400/50'
+    case 1: return 'bg-red-400/30 text-red-100 border border-red-400/50'
     default: return 'bg-gray-400/30 text-gray-100 border border-gray-400/50'
   }
 }
@@ -237,8 +234,7 @@ const getBadgeClass = (clusterId: number) => {
 const getIconBgClass = (clusterId: number) => {
   switch (clusterId) {
     case 0: return 'bg-green-400/30'
-    case 1: return 'bg-yellow-400/30'
-    case 2: return 'bg-red-400/30'
+    case 1: return 'bg-red-400/30'
     default: return 'bg-gray-400/30'
   }
 }
@@ -246,8 +242,7 @@ const getIconBgClass = (clusterId: number) => {
 const getPriorityDotClass = (clusterId: number) => {
   switch (clusterId) {
     case 0: return 'bg-green-300 animate-pulse'
-    case 1: return 'bg-yellow-300 animate-pulse'
-    case 2: return 'bg-red-300 animate-pulse'
+    case 1: return 'bg-red-300 animate-pulse'
     default: return 'bg-gray-300'
   }
 }
@@ -287,7 +282,7 @@ definePageMeta({
 
         <template v-else>
           <!-- Enhanced Statistics Cards -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Total Warga Card -->
             <Card class="relative overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-0">
               <CardContent class="p-6">
@@ -347,7 +342,7 @@ definePageMeta({
                   </div>
                   <div :class="getIconBgClass(def.id)" class="p-3 rounded-xl backdrop-blur-sm">
                     <component
-                      :is="def.id === 0 ? CheckCircle : def.id === 1 ? Clock : XCircle"
+                      :is="def.id === 0 ? CheckCircle : XCircle"
                       class="w-7 h-7 text-white"
                     />
                   </div>

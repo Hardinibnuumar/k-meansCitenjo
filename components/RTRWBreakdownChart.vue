@@ -56,13 +56,13 @@
       <div class="bg-white border rounded-lg p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-600 font-medium">RT Klaster 2 Terbanyak</p>
-            <p class="text-1xl font-bold text-red-600">{{ rtWithMostCluster2 }}</p>
-            <p class="text-xs text-gray-500">{{ maxCluster2Count }} warga</p>
+            <p class="text-sm text-gray-600 font-medium">RT Prioritas Tinggi Terbanyak</p>
+            <p class="text-1xl font-bold text-red-600">{{ rtWithMostCluster1 }}</p>
+            <p class="text-xs text-gray-500">{{ maxCluster1Count }} warga</p>
           </div>
           <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
             <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
             </svg>
           </div>
         </div>
@@ -70,13 +70,13 @@
       <div class="bg-white border rounded-lg p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-600 font-medium">RT Klaster 0 Terbanyak</p>
+            <p class="text-sm text-gray-600 font-medium">RT Prioritas Rendah Terbanyak</p>
             <p class="text-1xl font-bold text-green-600">{{ rtWithMostCluster0 }}</p>
             <p class="text-xs text-gray-500">{{ maxCluster0Count }} warga</p>
           </div>
           <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
             <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
           </div>
         </div>
@@ -152,9 +152,8 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RT/RW</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Warga</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Klaster 0</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Klaster 1</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Klaster 2</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prioritas Rendah</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prioritas Tinggi</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Klaster Dominan</th>
             </tr>
           </thead>
@@ -176,8 +175,7 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.totalWarga }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">{{ item.clusterCounts[0] || 0 }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-yellow-600">{{ item.clusterCounts[1] || 0 }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">{{ item.clusterCounts[2] || 0 }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">{{ item.clusterCounts[1] || 0 }}</td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span :class="getClusterDefinition(item.dominantClusterId).bgColorClass" class="px-2 py-1 rounded-full text-xs font-medium" :style="{ color: getClusterDefinition(item.dominantClusterId).colorClass }">
                   {{ getClusterDefinition(item.dominantClusterId).name }}
@@ -233,7 +231,7 @@ const rtRwBreakdown = computed(() => {
         rw: warga.rw,
         warga: [],
         totalWarga: 0,
-        clusterCounts: { 0: 0, 1: 0, 2: 0 } as Record<number, number>
+        clusterCounts: { 0: 0, 1: 0 } as Record<number, number>
       }
     }
 
@@ -270,14 +268,14 @@ const filteredRTRWData = computed(() => {
   return rtRwBreakdown.value.filter(item => item.rw.toString() === selectedRW.value)
 })
 
-// Data yang sudah diurutkan berdasarkan klaster dominan (misal: Klaster 2 paling atas)
+// Data yang sudah diurutkan berdasarkan klaster dominan (misal: Klaster 1 paling atas)
 const sortedRTRWData = computed(() => {
   return [...filteredRTRWData.value].sort((a, b) => {
-    // Urutkan berdasarkan klaster dominan (Klaster 2 > Klaster 1 > Klaster 0)
-    const clusterOrder = { 2: 0, 1: 1, 0: 2 }; // Prioritas: 2 (tertinggi), 1, 0 (terendah)
+    // Urutkan berdasarkan klaster dominan (Klaster 1 > Klaster 0)
+    const clusterOrder = { 1: 0, 0: 1 }; // Prioritas: 1 (tertinggi), 0 (terendah)
     const orderA = clusterOrder[a.dominantClusterId as keyof typeof clusterOrder] ?? 99;
     const orderB = clusterOrder[b.dominantClusterId as keyof typeof clusterOrder] ?? 99;
-    
+
     if (orderA !== orderB) {
       return orderA - orderB;
     }
@@ -296,13 +294,13 @@ const availableRW = computed(() => {
   return Array.from(rwSet).sort()
 })
 
-// Chart data (contoh: menampilkan jumlah warga di Klaster 2)
+// Chart data (contoh: menampilkan jumlah warga di Klaster 1 - Prioritas Tinggi)
 const chartLabels = computed(() => {
   return sortedRTRWData.value.map(item => `RT ${item.rt}/RW ${item.rw}`)
 })
 
 const chartData = computed(() => {
-  return sortedRTRWData.value.map(item => item.clusterCounts[2] || 0) // Jumlah warga di Klaster 2
+  return sortedRTRWData.value.map(item => item.clusterCounts[1] || 0) // Jumlah warga di Klaster 1 (Prioritas Tinggi)
 })
 
 // Summary statistics
@@ -310,7 +308,7 @@ const totalRT = computed(() => filteredRTRWData.value.length)
 
 const dominantClusterId = computed(() => {
   if (filteredRTRWData.value.length === 0) return undefined;
-  const allClusterCounts: Record<number, number> = { 0: 0, 1: 0, 2: 0 };
+  const allClusterCounts: Record<number, number> = { 0: 0, 1: 0 };
   filteredRTRWData.value.forEach(item => {
     for (const clusterIdStr in item.clusterCounts) {
       const clusterId = parseInt(clusterIdStr);
@@ -335,12 +333,12 @@ const dominantClusterId = computed(() => {
   return dominantId;
 })
 
-const rtWithMostCluster2 = computed(() => {
+const rtWithMostCluster1 = computed(() => {
   if (filteredRTRWData.value.length === 0) return '-';
   let maxCount = -1;
   let bestRtRw = '-';
   filteredRTRWData.value.forEach(item => {
-    const count = item.clusterCounts[2] || 0;
+    const count = item.clusterCounts[1] || 0;
     if (count > maxCount) {
       maxCount = count;
       bestRtRw = `RT ${item.rt}/RW ${item.rw}`;
@@ -349,9 +347,9 @@ const rtWithMostCluster2 = computed(() => {
   return bestRtRw;
 })
 
-const maxCluster2Count = computed(() => {
+const maxCluster1Count = computed(() => {
   if (filteredRTRWData.value.length === 0) return 0;
-  return Math.max(...filteredRTRWData.value.map(item => item.clusterCounts[2] || 0));
+  return Math.max(...filteredRTRWData.value.map(item => item.clusterCounts[1] || 0));
 })
 
 const rtWithMostCluster0 = computed(() => {
@@ -383,7 +381,7 @@ const rwComparison = computed(() => {
 
   return Object.entries(rwGroups).map(([rw, items]) => {
     const totalWargaRW = items.reduce((sum, item) => sum + item.totalWarga, 0);
-    const allClusterCountsRW: Record<number, number> = { 0: 0, 1: 0, 2: 0 };
+    const allClusterCountsRW: Record<number, number> = { 0: 0, 1: 0 };
     items.forEach(item => {
       for (const clusterIdStr in item.clusterCounts) {
         const clusterId = parseInt(clusterIdStr);
@@ -405,13 +403,13 @@ const rwComparison = computed(() => {
       }
     }
 
-    let rtWithMostCluster2 = '-';
-    let maxCluster2Count = -1;
+    let rtWithMostCluster1 = '-';
+    let maxCluster1Count = -1;
     items.forEach(item => {
-      const count = item.clusterCounts[2] || 0;
-      if (count > maxCluster2Count) {
-        maxCluster2Count = count;
-        rtWithMostCluster2 = `RT ${item.rt}`;
+      const count = item.clusterCounts[1] || 0;
+      if (count > maxCluster1Count) {
+        maxCluster1Count = count;
+        rtWithMostCluster1 = `RT ${item.rt}`;
       }
     });
 
@@ -421,10 +419,10 @@ const rwComparison = computed(() => {
       totalWarga: totalWargaRW,
       clusterCounts: allClusterCountsRW,
       dominantClusterId: dominantId,
-      rtWithMostCluster2: rtWithMostCluster2
+      rtWithMostCluster1: rtWithMostCluster1
     }
   }).sort((a, b) => {
-    const clusterOrder = { 2: 0, 1: 1, 0: 2 };
+    const clusterOrder = { 1: 0, 0: 1 };
     const orderA = clusterOrder[a.dominantClusterId as keyof typeof clusterOrder] ?? 99;
     const orderB = clusterOrder[b.dominantClusterId as keyof typeof clusterOrder] ?? 99;
     return orderA - orderB;
@@ -440,9 +438,8 @@ const exportToExcel = () => {
     'Rank': sortedRTRWData.value.indexOf(item) + 1,
     'RT/RW': `RT ${item.rt}/RW ${item.rw}`,
     'Total Warga': item.totalWarga,
-    'Klaster 0': item.clusterCounts[0] || 0,
-    'Klaster 1': item.clusterCounts[1] || 0,
-    'Klaster 2': item.clusterCounts[2] || 0,
+    'Prioritas Rendah': item.clusterCounts[0] || 0,
+    'Prioritas Tinggi': item.clusterCounts[1] || 0,
     'Klaster Dominan': getClusterDefinition(item.dominantClusterId).name
   }))
 

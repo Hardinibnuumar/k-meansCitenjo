@@ -227,7 +227,7 @@ const dataWarga = ref<any[]>([])
 const isLoading = ref(false)
 const searchQuery = ref('')
 const sortBy = ref<'nama' | 'cluster'>('cluster')
-const numClusters = ref(3)
+const numClusters = ref(2)
 
 const fetchData = async () => {
   isLoading.value = true
